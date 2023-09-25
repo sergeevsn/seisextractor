@@ -20,3 +20,5 @@ extracts values from the cubes to new pandas table. Finally the resulting file i
 Does literally the same, but with ability to interactively choose SEG-Y folder and well coordinates file,
 as well as check out its content. Made with PyQt5.
 
+You can edit START DEPTH and DEPTH STEP values right inside table after scanning SEG-Y headers
+
