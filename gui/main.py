@@ -1,4 +1,4 @@
-import sys  # sys нужен для передачи argv в QApplication
+import sys  # 
 import os
 
 from PyQt5 import QtWidgets, QtCore
@@ -8,10 +8,10 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from scipy.interpolate import RegularGridInterpolator
 
-import design  # дизайн окна PyQt
+import design  # PyQt Design file
 
 sys.path.append("..")
-from common.utils import load_segy_coords, load_well_coords, load_cube
+from common.classeslib import *
 
 
 class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
@@ -32,6 +32,8 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         
         super().__init__()        
         self.setupUi(self)  
+
+        self.extractor = Extractor(True)
         
         self.button_OpenSegyFolder.clicked.connect(self.chooseSegyFolder)
         self.button_ScanSegyFolder.clicked.connect(self.scanSegyFolder)
@@ -42,11 +44,20 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.button_Extract.clicked.connect(self.extractData)
         
 
+    def wait_start(self):
+        self.group_Seismic.setProperty("enabled", False)
+        self.group_Wells.setProperty("enabled", False)   
+        QtWidgets.qApp.setOverrideCursor(QtCore.Qt.WaitCursor)
+
+    def wait_end(self):  
+        QtWidgets.qApp.setOverrideCursor(QtCore.Qt.ArrowCursor)    
+        self.group_Seismic.setProperty("enabled", True)
+        self.group_Wells.setProperty("enabled", True)   
+        
     def errorMessage(self, text):
         msg = QtWidgets.QMessageBox()
         msg.setIcon(QtWidgets.QMessageBox.Critical)
-        msg.setText(text)
-        #msg.setInformativeText(text)
+        msg.setText(text)       
         msg.setWindowTitle("Error")
         msg.exec_()
 
@@ -57,60 +68,32 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         msg.setWindowTitle("Success")
         msg.exec_()
 
-    def scanSegyFolder(self):
-        self.list_Filenames.clear()
-        self.segy_filenames = []
+    def fill_segyparams_table(self):
+        self.table_SEGYParams.setItem(0, 1, design.create_non_editable_item(f'{np.min(self.extractor.inlines)}-{np.max(self.extractor.inlines)}'))
+        self.table_SEGYParams.setItem(1, 1, design.create_non_editable_item(f'{np.min(self.extractor.xlines)}-{np.max(self.extractor.xlines)}'))
+        fast_msg = "XLINE"
+        if self.extractor.inline_fast:
+            fast_msg = "INLINE"
+        self.table_SEGYParams.setItem(2, 1, design.create_non_editable_item(fast_msg))
+        self.table_SEGYParams.setItem(3, 1, design.create_non_editable_item(f'{np.min(self.extractor.geo_coords[:,0])}-{np.max(self.extractor.geo_coords[:,0])}'))
+        self.table_SEGYParams.setItem(4, 1, design.create_non_editable_item(f'{np.min(self.extractor.geo_coords[:,1])}-{np.max(self.extractor.geo_coords[:,1])}'))        
+        self.table_SEGYParams.setItem(5, 1, QtWidgets.QTableWidgetItem(f'{self.extractor.start_depth}')) # Changeable item!
+        self.table_SEGYParams.setItem(6, 1, design.create_non_editable_item(f'{self.extractor.depth_step}'))
+        self.table_SEGYParams.setItem(7, 1, design.create_non_editable_item(f'{self.extractor.depths[-1]}'))        
+
+
+    def scanSegyFolder(self):        
+        self.list_Filenames.clear()                
+        self.wait_start()
         directory = self.edit_SEGYFolderName.text()
-        if directory:  
-            for file_name in os.listdir(directory): 
-                if file_name.endswith('.sgy') or file_name.endswith('.segy'):
-                    self.list_Filenames.addItem(file_name)
-                    self.segy_filenames.append(file_name)
-        
-        self.segy_foldername = directory
-        
-        if not os.path.exists(self.segy_foldername)  or not os.path.isdir(self.segy_foldername) or len(self.segy_filenames) == 0:
-            self.errorMessage('Check your SEG-Y folder!')
-            return                 
-
-
-        self.geo_c, self.grid_c, self.depth = load_segy_coords(os.path.join(directory, self.segy_filenames[0]))
-        self.inlines = np.unique(self.grid_c[:, 0])
-        self.xlines = np.unique(self.grid_c[:, 1])       
-        
-        if self.grid_c[0,0] == self.grid_c[2,0]:
-            self.inline_fast = False
-            self.table_SEGYParams.setItem(2, 1, design.create_non_editable_item(f'Crossline'))
-        else:
-            self.inline_fast = True
-            self.table_SEGYParams.setItem(2, 1, design.create_non_editable_item(f'Inline'))
-
-        self.depth_step = self.depth[1] - self.depth[0]   
-
-        self.table_SEGYParams.setItem(0, 1, design.create_non_editable_item(f'{np.min(self.inlines)}-{np.max(self.inlines)}'))
-        self.table_SEGYParams.setItem(1, 1, design.create_non_editable_item(f'{np.min(self.xlines)}-{np.max(self.xlines)}'))
-        self.table_SEGYParams.setItem(3, 1, design.create_non_editable_item(f'{np.min(self.geo_c[:,0])}-{np.max(self.geo_c[:,0])}'))
-        self.table_SEGYParams.setItem(4, 1, design.create_non_editable_item(f'{np.min(self.geo_c[:,1])}-{np.max(self.geo_c[:,1])}'))        
-        self.table_SEGYParams.setItem(5, 1, QtWidgets.QTableWidgetItem(f'{np.min(self.depth)}'))
-        self.table_SEGYParams.setItem(6, 1, QtWidgets.QTableWidgetItem(f'{self.depth_step}'))
-        self.table_SEGYParams.setItem(7, 1, design.create_non_editable_item(f'{self.depth[-1]}'))         
-
-        
-
-    def calc_well_grid_coords(self):
-        rgr = LinearRegression()
-        rgr.fit(self.geo_c, self.grid_c)
-        df = self.well_coords.copy()
-        ilnxln = rgr.predict(np.column_stack((self.well_coords.iloc[:,1].values, self.well_coords.iloc[:,2].values)))
-        df['INL'] = ilnxln[:,0]
-        df['XLN'] = ilnxln[:,1]
-       
-        # обрезка точек, выходящих за пределы куба
-        df=df[(df.INL>=min(self.inlines))&(df.INL<=max(self.inlines))]
-        df=df[(df.XLN>=min(self.xlines))&(df.XLN<=max(self.xlines))]
-        df=df[(df[df.columns[3]]>=min(self.depth))&(df[df.columns[3]]<=max(self.depth))].reset_index(drop=True)
-    
-        return df
+        if directory:                    
+            if not self.extractor.scan_seismic_folder(directory):
+                self.errorMessage('Check your SEG-Y folder!')
+                return          
+            self.fill_segyparams_table()                   
+        self.list_Filenames.addItems(self.extractor.filenames)    
+        self.wait_end()    
+        print('Done.')    
 
 
     def chooseSegyFolder(self):
@@ -118,26 +101,37 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         directory = QtWidgets.QFileDialog.getExistingDirectory(self, "Choose SEG-Y folder")
         if directory:
             self.edit_SEGYFolderName.setText(directory)
-            self.scanSegyFolder()
+            #self.scanSegyFolder()
 
-    def scanWellFile(self):
+    def chooseWellFile(self):
 
-        self.well_filename = self.edit_WellFileName.text() 
+        filename, check = QtWidgets.QFileDialog.getOpenFileName(self, "Choose well coordinates file", "", "CSV files (*.csv) ;; Excel files (*.xlsx)")
+        if filename:
+            self.edit_WellFileName.setText(filename)               
 
-        if not os.path.exists(self.well_filename) or not os.path.isfile(self.well_filename):
-            self.errorMessage("Speciefied well coordinates file doesn't exist!")   
-            return     
-        
-        self.well_coords = load_well_coords(self.well_filename)
-        if self.well_coords.empty:
-            error_dialog = QtWidgets.QErrorMessage()
-            error_dialog.showMessage("Something wrong with your well coordinates table!")   
+    def fill_wellTable(self):    
+        self.table_WellData.setRowCount(len(self.extractor.table))
+        self.table_WellData.setColumnCount(len(self.extractor.table.columns))
+        self.table_WellData.setHorizontalHeaderLabels(self.extractor.table.columns)
+        for i in range(len(self.extractor.table)):
+            for j in range(len(self.extractor.table.columns)):
+                self.table_WellData.setItem(i, j, design.create_non_editable_item(str(self.extractor.table.iloc[i, j])))                      
+
+    def scanWellFile(self):          
+        print(self.edit_WellFileName.text())
+        self.wait_start()
+        if not self.extractor.load_table(self.edit_WellFileName.text()):    
+            self.errorMessage("Something wrong with your well coordinates table!")   
             return
         
-        self.table_WellData.setRowCount(len(self.well_coords))
-        for i in range(len(self.well_coords)):
-            for j in range(4):
-                self.table_WellData.setItem(i, j, design.create_non_editable_item(str(self.well_coords.iloc[i, j])))                
+        self.fill_wellTable()              
+        self.combo_choose_Xcol.addItems(self.extractor.table.columns)
+        self.combo_choose_Ycol.addItems(self.extractor.table.columns)
+        self.combo_choose_Zcol.addItems(self.extractor.table.columns)
+        self.combo_choose_Xcol.setCurrentIndex(0)
+        self.combo_choose_Ycol.setCurrentIndex(1)
+        self.combo_choose_Zcol.setCurrentIndex(2)
+        self.wait_end()
          
     def updateDepth(self):
         try:
@@ -153,78 +147,60 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.depth = np.arange(self.depth_start, self.depth_start+self.depth_step*len(self.depth), self.depth_step)
         self.table_SEGYParams.setItem(7, 1, design.create_non_editable_item(f'{self.depth[-1]}'))
     
-    def extractData(self):       
-        
-        self.updateDepth()
+    def extractData(self):               
+        try:
+            depth_start = int(self.table_SEGYParams.item(5, 1).text())
+        except:
+            self.errorMessage("Start depth is invalid!")   
+            return      
+
+        self.extractor.recalc_depth(depth_start)    
+
+        if not self.extractor.set_coord_columns_by_name(self.combo_choose_Xcol.currentText(), self.combo_choose_Ycol.currentText(), self.combo_choose_Zcol.currentText()):
+            self.errorMessage("Something wrong with specified columns!")
+            return
        
-        if len(self.geo_c)==0 or len(self.grid_c)==0 or len(self.depth)==0 or self.depth_step<0 or len(self.well_coords)==0:
-            self.errorMessage("Check your parameters!")   
-            return   
-       
-        df = self.calc_well_grid_coords()   
-        #df.to_excel('temp_coords_gui.xlsx')
-        
-        
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", ".", "CSV files (*.csv);;All Files (*)")
+        if not self.extractor.calc_well_grid_coords():
+            self.errorMessage("Cannot perform regression to calculate well grid coordinates!")
+            return 
+
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(None, "Save File", ".", "CSV files (*.csv);; Excel files (*.xlsx)")
 
         if filename:
-            for i, name in enumerate(self.segy_filenames):
+            for i, fname in enumerate(self.extractor.filenames):
                 
                 self.progressBar.setProperty("visible", True)
-                self.group_Seismic.setProperty("enabled", False)
-                self.group_Wells.setProperty("enabled", False)               
+                self.wait_start()                    
                 
-                QtWidgets.qApp.setOverrideCursor(QtCore.Qt.WaitCursor)
-
-                data = load_cube(os.path.join(self.segy_foldername, name))
-                
-                if not self.inline_fast:
-                    data = data.reshape(len(self.inlines), len(self.xlines), data.shape[-1])
-                else:
-                    data = data.reshape(len(self.xlines), len(self.inlines), data.shape[-1]).transpose((1,0,2))    
-                
-                interpolator = RegularGridInterpolator((self.inlines, self.xlines, self.depth), data)
-
-                seismic_values = []
-             
-                for well in pd.unique(df[df.columns[0]]):                  
-                    t = df[df[df.columns[0]]==well].reset_index(drop=True)                            
-                    well_grid_coords = np.column_stack((t.INL, t.XLN, t[t.columns[3]]))                   
-                    well_seismic = interpolator(well_grid_coords)                     
-                    seismic_values.extend(well_seismic)
-
-                df[name] = seismic_values
-                progval = self.progressBar.value() + 100/len(self.segy_filenames)
-                if i == len(self.segy_filenames)-1:
+                if not self.extractor.extract_attribute(fname):
+                    self.errorMessage(f"Cannot process file {fname}!")
+                    self.wait_end()
+                    return                         
+               
+                progval = self.progressBar.value() + 100/len(self.extractor.filenames)
+                if i == len(self.extractor.filenames)-1:
                     progval = 100
                 self.progressBar.setProperty("value", progval)
 
-            try:
-                df.to_csv(filename, index=None)
-            except:
-                self.errorMessage(f'There is a problem with saving result to file {filename}!')
-                return
+            if not self.extractor.save_result_table(filename):
+                self.errorMessage(f"Cannot save file {filename}!")
+                self.wait_end()
+                return                     
 
+            self.progressBar.setProperty("visible", False)
+            self.wait_end()
             self.successMessage(f'File {filename} successfully saved') 
-            self.progressBar.setProperty("visible", False)   
-            self.group_Seismic.setProperty("enabled", True)
-            self.group_Wells.setProperty("enabled", True)   
-            QtWidgets.qApp.restoreOverrideCursor() 
+              
+            
 
-
-    def chooseWellFile(self):
-
-        filename, check = QtWidgets.QFileDialog.getOpenFileName(self, "Choose well coordinates file")
-        if filename:
-            self.edit_WellFileName.setText(filename)             
-            self.scanWellFile()                          
+                                           
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication    
-    window = ExtractorApp()  # Создаём объект класса ExampleApp
-    window.setWindowTitle("SeisExtractor GUI v.0.1")
-    window.show()  # Показываем окно
-    app.exec_()  # и запускаем приложение
+    app = QtWidgets.QApplication(sys.argv)   
+    window = ExtractorApp() 
+    window.setWindowTitle("SeisExtractor GUI v.0.2")
+    window.show() 
+    app.exec_()  
 
-if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
-    main()  # то запускаем функцию main()
+if __name__ == '__main__':  
+    main()  

@@ -20,12 +20,15 @@ def create_non_editable_item(text):
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(483, 820)
+        MainWindow.resize(483, 880)
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+
         self.group_Seismic = QtWidgets.QGroupBox(self.centralwidget)
-        self.group_Seismic.setGeometry(QtCore.QRect(10, 10, 500, 330))
+        self.group_Seismic.setGeometry(QtCore.QRect(10, 10, 465, 330))
         self.group_Seismic.setObjectName("group_Seismic")
+
         self.label = QtWidgets.QLabel(self.group_Seismic)
         self.label.setGeometry(QtCore.QRect(240, 50, 71, 16))
         self.label.setObjectName("label")
@@ -35,6 +38,7 @@ class Ui_MainWindow(object):
         self.label_4 = QtWidgets.QLabel(self.group_Seismic)
         self.label_4.setGeometry(QtCore.QRect(10, 50, 161, 16))
         self.label_4.setObjectName("label_4")
+
         self.table_SEGYParams = QtWidgets.QTableWidget(self.group_Seismic)
         self.table_SEGYParams.setGeometry(QtCore.QRect(10, 70, 260, 250))
         self.table_SEGYParams.setObjectName("table_SEGYParams")
@@ -44,8 +48,7 @@ class Ui_MainWindow(object):
         self.table_SEGYParams.setRowCount(8)
         self.table_SEGYParams.verticalHeader().hide()
 
-       
-        
+            
         self.table_SEGYParams.setItem(0, 0, create_non_editable_item('INLINES'))
         self.table_SEGYParams.setItem(1, 0, create_non_editable_item('CROSSLINES'))
         self.table_SEGYParams.setItem(2, 0, create_non_editable_item('FAST AXIS'))
@@ -54,31 +57,30 @@ class Ui_MainWindow(object):
         self.table_SEGYParams.setItem(5, 0, create_non_editable_item('START DEPTH'))
         self.table_SEGYParams.setItem(6, 0, create_non_editable_item('DEPTH STEP'))
         self.table_SEGYParams.setItem(7, 0, create_non_editable_item('END DEPTH'))
+
         self.list_Filenames = QtWidgets.QListWidget(self.group_Seismic)
         self.list_Filenames.setGeometry(QtCore.QRect(280, 70, 180, 250))
         self.list_Filenames.setObjectName("list_Filenames")
+        
         self.edit_SEGYFolderName = QtWidgets.QLineEdit(self.group_Seismic)
         self.edit_SEGYFolderName.setGeometry(QtCore.QRect(80, 20, 280, 22))
         self.edit_SEGYFolderName.setObjectName("edit_SEGYFolderName")
+
         self.button_OpenSegyFolder = QtWidgets.QToolButton(self.group_Seismic)
         self.button_OpenSegyFolder.setGeometry(QtCore.QRect(360, 20, 31, 22))
         self.button_OpenSegyFolder.setObjectName("button_OpenSegyFolder")
         self.button_ScanSegyFolder = QtWidgets.QPushButton(self.group_Seismic)
         self.button_ScanSegyFolder.setGeometry(QtCore.QRect(400, 20, 51, 23))
         self.button_ScanSegyFolder.setObjectName("button_ScanSegyFolder")
+
         self.group_Wells = QtWidgets.QGroupBox(self.centralwidget)
-        self.group_Wells.setGeometry(QtCore.QRect(10, 350, 461, 351))
-        self.group_Wells.setObjectName("group_Wells")       
+        self.group_Wells.setGeometry(QtCore.QRect(10, 350, 500, 400))
+        self.group_Wells.setObjectName("group_Wells")   
+
         self.label_3 = QtWidgets.QLabel(self.group_Wells)
         self.label_3.setGeometry(QtCore.QRect(10, 60, 61, 21))
         self.label_3.setObjectName("label_3")
-        self.table_WellData = QtWidgets.QTableWidget(self.group_Wells)
-        self.table_WellData.setGeometry(QtCore.QRect(10, 90, 441, 231))
-        self.table_WellData.setObjectName("table_WellData")
-        self.table_WellData.setColumnCount(4)
-        self.table_WellData.setColumnWidth(0, 80) 
-        self.table_WellData.setHorizontalHeaderLabels(["Well", "X", "Y", "Z"])
-        self.table_WellData.setRowCount(0)
+
         self.button_OpenWellFile = QtWidgets.QToolButton(self.group_Wells)
         self.button_OpenWellFile.setGeometry(QtCore.QRect(360, 30, 31, 22))
         self.button_OpenWellFile.setObjectName("button_OpenWellFile")
@@ -88,18 +90,48 @@ class Ui_MainWindow(object):
         self.label_5 = QtWidgets.QLabel(self.group_Wells)
         self.label_5.setGeometry(QtCore.QRect(10, 30, 34, 16))
         self.label_5.setObjectName("label_5")
+
+        self.table_WellData = QtWidgets.QTableWidget(self.group_Wells)
+        self.table_WellData.setGeometry(QtCore.QRect(10, 60, 441, 231))
+        self.table_WellData.setObjectName("table_WellData")
+        self.table_WellData.setColumnCount(4)
+        self.table_WellData.setColumnWidth(0, 80)     
+        self.table_WellData.setRowCount(0)
+
+        self.label_choose_Xcol = QtWidgets.QLabel(self.group_Wells)
+        self.label_choose_Xcol.setGeometry(QtCore.QRect(10, 310, 160, 20))
+        self.label_choose_Xcol.setText('Choose column for X coord:')
+        self.combo_choose_Xcol = QtWidgets.QComboBox(self.group_Wells)
+        self.combo_choose_Xcol.setGeometry(QtCore.QRect(200, 310, 240, 20))
+
+        self.label_choose_Ycol = QtWidgets.QLabel(self.group_Wells)
+        self.label_choose_Ycol.setGeometry(QtCore.QRect(10, 340, 160, 20))
+        self.label_choose_Ycol.setText('Choose column for Y coord:')
+        self.combo_choose_Ycol = QtWidgets.QComboBox(self.group_Wells)
+        self.combo_choose_Ycol.setGeometry(QtCore.QRect(200, 340, 240, 20))        
+
+        self.label_choose_Zcol = QtWidgets.QLabel(self.group_Wells)
+        self.label_choose_Zcol.setGeometry(QtCore.QRect(10, 370, 160, 20))
+        self.label_choose_Zcol.setText('Choose column for Depth:')
+        self.combo_choose_Zcol = QtWidgets.QComboBox(self.group_Wells)
+        self.combo_choose_Zcol.setGeometry(QtCore.QRect(200, 370, 240, 20))
+
         self.button_ScanWellFile = QtWidgets.QPushButton(self.group_Wells)
         self.button_ScanWellFile.setGeometry(QtCore.QRect(400, 30, 51, 22))
         self.button_ScanWellFile.setObjectName("button_ScanWellFile")
+
         self.button_Extract = QtWidgets.QPushButton(self.centralwidget)
-        self.button_Extract.setGeometry(QtCore.QRect(20, 720, 75, 23))
+        self.button_Extract.setGeometry(QtCore.QRect(20, 770, 75, 23))
         self.button_Extract.setObjectName("button_Extract")
+
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setGeometry(QtCore.QRect(100, 720, 361, 22))
+        self.progressBar.setGeometry(QtCore.QRect(10, 800, 475, 32))
         self.progressBar.setProperty("value", 0)
         self.progressBar.setProperty("visible", False)        
         self.progressBar.setObjectName("progressBar")
+
         MainWindow.setCentralWidget(self.centralwidget)
+
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 483, 21))
         self.menubar.setObjectName("menubar")
