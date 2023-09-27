@@ -34,7 +34,9 @@ as well as check out its content. Made with PyQt5.
 You can edit START DEPTH value right inside table after scanning SEG-Y headers
 
 To run with test data, just type in terminal:
+
 ```cd gui```
+
 ```python main.py```
 
 Choose the ```test_data``` folder in ```SEISMIC``` section, then click ```Scan```.
