@@ -42,6 +42,8 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.button_ScanWellFile.clicked.connect(self.scanWellFile)
 
         self.button_Extract.clicked.connect(self.extractData)
+
+       
         
 
     def wait_start(self):
@@ -92,7 +94,9 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 return          
             self.fill_segyparams_table()                   
         self.list_Filenames.addItems(self.extractor.filenames)    
-        self.wait_end()    
+        self.wait_end()   
+        target_item = self.table_SEGYParams.item(5, 1)
+        self.table_SEGYParams.editItem(target_item) 
         print('Done.')    
 
 
@@ -190,6 +194,7 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             self.progressBar.setProperty("visible", False)
             self.wait_end()
             self.successMessage(f'File {filename} successfully saved') 
+            self.extractor.restore_table()
               
             
 

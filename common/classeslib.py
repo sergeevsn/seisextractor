@@ -25,7 +25,8 @@ class Extractor:
         self.depths = []
         self.seis_folder  = ""
         self.table_file_name = ""
-        self.table = pd.DataFrame()               
+        self.table = pd.DataFrame()  
+        self.table_old = pd.DataFrame()             
         self.filenames = []
         self.total_samples = 0
         self.x_col = 0
@@ -97,7 +98,12 @@ class Extractor:
             error_msg(f'Empty table in file {self.table_file_name}!')   
             return False
 
+        self.table_old = self.table.copy()    
+
         return True    
+
+    def restore_table(self):
+        self.table = self.table_old.copy()    
 
     def set_coord_columns_by_name(self, new_x_col, new_y_col, new_z_col):
         if not {new_x_col, new_y_col, new_z_col}.issubset(set(self.table.columns)):
@@ -132,7 +138,6 @@ class Extractor:
 
     def table_bin_average(self):
     # well samples averaging inside a bin corresponding to seismic cube sampling
-
         
         inl_step = np.round(np.mean(np.diff(self.inlines)))    
         xln_step = np.round(np.mean(np.diff(self.inlines)))    
@@ -141,8 +146,7 @@ class Extractor:
         self.table[self.z_col] = np.round(self.table[self.z_col]/self.depth_step)*self.depth_step
         #
         #self.table.to_csv('temp.csv', index=None)
-        self.table = self.table.groupby(['inline', 'xline', self.z_col]).mean().reset_index()
-        self.table.to_csv('temp_table.csv')
+        self.table = self.table.groupby(['inline', 'xline', self.z_col]).mean().reset_index()      
 
 
     def crop_table(self):

@@ -20,7 +20,7 @@ def create_non_editable_item(text):
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(483, 900)
+        MainWindow.resize(483, 870)
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -30,7 +30,7 @@ class Ui_MainWindow(object):
         self.group_Seismic.setObjectName("group_Seismic")
 
         self.label = QtWidgets.QLabel(self.group_Seismic)
-        self.label.setGeometry(QtCore.QRect(240, 50, 71, 16))
+        self.label.setGeometry(QtCore.QRect(284, 50, 71, 16))
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.group_Seismic)
         self.label_2.setGeometry(QtCore.QRect(10, 20, 34, 16))
@@ -136,14 +136,7 @@ class Ui_MainWindow(object):
 
         MainWindow.setCentralWidget(self.centralwidget)
 
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 483, 21))
-        self.menubar.setObjectName("menubar")
-        self.menuAbout = QtWidgets.QMenu(self.menubar)
-        self.menuAbout.setObjectName("menuAbout")
-        self.menuExit = QtWidgets.QMenu(self.menubar)
-        self.menuExit.setObjectName("menuExit")
-        MainWindow.setMenuBar(self.menubar)
+        
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
@@ -157,9 +150,7 @@ class Ui_MainWindow(object):
         self.actionOpen_CSV_file.setObjectName("actionOpen_CSV_file")
         self.actionExtract_to_CSV_file = QtWidgets.QAction(MainWindow)
         self.actionExtract_to_CSV_file.setObjectName("actionExtract_to_CSV_file")
-        self.menubar.addAction(self.menuAbout.menuAction())
-        self.menubar.addAction(self.menuExit.menuAction())
-
+        
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -178,8 +169,7 @@ class Ui_MainWindow(object):
         self.label_5.setText(_translate("MainWindow", "File:"))
         self.button_ScanWellFile.setText(_translate("MainWindow", "Scan"))
         self.button_Extract.setText(_translate("MainWindow", "Extract"))
-        self.menuAbout.setTitle(_translate("MainWindow", "About"))
-        self.menuExit.setTitle(_translate("MainWindow", "Exit"))
+    
         self.actionOpen_folder.setText(_translate("MainWindow", "Open folder"))
         self.actionOpen_single_file.setText(_translate("MainWindow", "Open single file"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
