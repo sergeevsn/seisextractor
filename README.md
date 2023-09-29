@@ -1,6 +1,9 @@
 # Seis Extractor - command line and GUI versions
 ## Command line version
-usage: ```python seisextractor <seg-y_folder> <well_coords_table> <coord_columns> <result_table> <start_depth>```
+usage: ```python seisextractor <seg-y_folder> <well_coords_table> <coord_columns> <result_table> <bin_averaging> <start_depth>```
+
+```bin_averaging``` and ```start_depth``` are optional parameters and are provided as true/false and a number.
+By default bin_averaging is false and start_depth is equal to the value from SEG-Y trace headers.
 
 The program reads the first SEG-Y file of the given folder and scans headers for inlines, crosslines, 
 cdp_x and cdp_y. The bytes for now are 189, 193, 181 and 185 respectievly. There will be an opportunity
@@ -12,6 +15,13 @@ Then it calculates mapping function from coordinates to inlines and crosslines.
 Well coordinate file must have at least 3 columns. In command line argument #3 column names corresponding 
 to X coordinate, Y coordinate and Depth are specified separated by comma. The file can be CSV table with 
 comma separator (.csv) or Excel table (.xlsx)
+
+If ```bin_averaging``` is ```true```, then well coordinates are averaged according to seismic bin 
+(unique inline, xline, sample), else well samples stays with its original coordinates and 
+seismic data is sampled usign linear interpolation via scipy.interpolate.RegularGridInterpolator. 
+Actually this interpolator is used anyway, but in case of bin_averaging seismic data is sampled 
+from exact grid points.
+
 
 After well coordinates are read, the program iterates SEG-Y files and using RegularGridInterpolator, 
 extracts values from the cubes to new pandas table. Finally the resulting file is saved as CSV table.

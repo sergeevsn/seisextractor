@@ -28,10 +28,11 @@ class Extractor:
         self.table = pd.DataFrame()               
         self.filenames = []
         self.total_samples = 0
-        self.x_col_number = 0
-        self.y_col_number = 1
-        self.z_col_number = 2
+        self.x_col = 0
+        self.y_col = 1
+        self.z_col = 2
         self.current_traces = []
+        
 
     def scan_seismic_folder(self, folder_name, cdpx_byte=181, cdpy_byte=185, inline_byte=189, xline_byte=193):
         if not os.path.exists(folder_name) or not os.path.isdir(folder_name):
@@ -102,12 +103,12 @@ class Extractor:
         if not {new_x_col, new_y_col, new_z_col}.issubset(set(self.table.columns)):
             error_msg('Column names are not present in loaded table!')
             return False
-        self.x_col_number = list(self.table.columns).index(new_x_col)    
-        self.y_col_number = list(self.table.columns).index(new_y_col) 
-        self.z_col_number = list(self.table.columns).index(new_z_col)  
+        self.x_col = new_x_col
+        self.y_col = new_y_col
+        self.z_col = new_z_col
         return True
 
-    def calc_well_grid_coords(self):
+    def calc_well_grid_coords(self, bin_averaging):
     # Finds dependecy between geo coordinates and grid coordinates using regression and then calculates well grid coordinates
         
         if len(self.table)==0 or len(self.geo_coords)==0 or len(self.grid_coords)==0 or len(self.depths)==0:
@@ -118,20 +119,37 @@ class Extractor:
             rgr = RidgeCV() # For 3D case linear regression is sufficient, but for curved 2D lines there must be something more complicated    
         try:            
             rgr.fit(self.geo_coords, self.grid_coords)
-            self.well_grid_coords = rgr.predict(np.column_stack((self.table.iloc[:, self.x_col_number].values, self.table.iloc[:, self.y_col_number].values)))
+            self.well_grid_coords = rgr.predict(np.column_stack((self.table.loc[:, self.x_col].values, self.table.loc[:, self.y_col].values)))
         except:
             error_msg('Cannot perform regression to calculate well grid coordinates!')
             return False            
         self.table['inline'] = self.well_grid_coords[:, 0]
         self.table['xline'] = self.well_grid_coords[:, 1]
+        if bin_averaging:
+            self.table_bin_average()
         self.crop_table()
         return True
+
+    def table_bin_average(self):
+    # well samples averaging inside a bin corresponding to seismic cube sampling
+
+        
+        inl_step = np.round(np.mean(np.diff(self.inlines)))    
+        xln_step = np.round(np.mean(np.diff(self.inlines)))    
+        self.table['inline'] = np.round(self.table['inline']/inl_step)*inl_step
+        self.table['xline'] = np.round(self.table['xline']/inl_step)*xln_step
+        self.table[self.z_col] = np.round(self.table[self.z_col]/self.depth_step)*self.depth_step
+        #
+        #self.table.to_csv('temp.csv', index=None)
+        self.table = self.table.groupby(['inline', 'xline', self.z_col]).mean().reset_index()
+        self.table.to_csv('temp_table.csv')
+
 
     def crop_table(self):
     # Crops table according to seismic data extent        
         self.table=self.table[(self.table.inline>=min(self.inlines))&(self.table.inline<=max(self.inlines))]
         self.table=self.table[(self.table.xline>=min(self.xlines))&(self.table.xline<=max(self.xlines))]        
-        self.table=self.table[(self.table.iloc[:, self.z_col_number]>=min(self.depths))&(self.table.iloc[:, self.z_col_number]<=max(self.depths))].reset_index(drop=True)
+        self.table=self.table[(self.table.loc[:, self.z_col]>=min(self.depths))&(self.table.loc[:, self.z_col]<=max(self.depths))].reset_index(drop=True)
         return True
 
     def load_cube(self, filename):
@@ -162,7 +180,7 @@ class Extractor:
             data = self.current_traces.reshape(len(self.xlines), len(self.inlines), self.total_samples).transpose((1,0,2))        
         interpolator = RegularGridInterpolator((self.inlines, self.xlines, self.depths), data)    
         seismic_values = []               
-        well_grid_coords = np.column_stack((self.table.inline, self.table.xline, self.table.iloc[:, self.z_col_number]))          
+        well_grid_coords = np.column_stack((self.table.inline, self.table.xline, self.table.loc[:, self.z_col]))          
         well_seismic = interpolator(well_grid_coords)          
         seismic_values.extend(well_seismic)
         attribute_name = os.path.splitext(fname)[0]

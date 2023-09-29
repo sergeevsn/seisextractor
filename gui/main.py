@@ -160,7 +160,7 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             self.errorMessage("Something wrong with specified columns!")
             return
        
-        if not self.extractor.calc_well_grid_coords():
+        if not self.extractor.calc_well_grid_coords(self.checkbox_bin_averaging.isChecked()):
             self.errorMessage("Cannot perform regression to calculate well grid coordinates!")
             return 
 

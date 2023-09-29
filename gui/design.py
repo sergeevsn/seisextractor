@@ -20,7 +20,7 @@ def create_non_editable_item(text):
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(483, 880)
+        MainWindow.resize(483, 900)
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -74,7 +74,7 @@ class Ui_MainWindow(object):
         self.button_ScanSegyFolder.setObjectName("button_ScanSegyFolder")
 
         self.group_Wells = QtWidgets.QGroupBox(self.centralwidget)
-        self.group_Wells.setGeometry(QtCore.QRect(10, 350, 500, 400))
+        self.group_Wells.setGeometry(QtCore.QRect(10, 350, 500, 430))
         self.group_Wells.setObjectName("group_Wells")   
 
         self.label_3 = QtWidgets.QLabel(self.group_Wells)
@@ -115,17 +115,21 @@ class Ui_MainWindow(object):
         self.label_choose_Zcol.setText('Choose column for Depth:')
         self.combo_choose_Zcol = QtWidgets.QComboBox(self.group_Wells)
         self.combo_choose_Zcol.setGeometry(QtCore.QRect(200, 370, 240, 20))
+        
+        self.checkbox_bin_averaging = QtWidgets.QCheckBox(self.group_Wells)
+        self.checkbox_bin_averaging.setText("Bin averaging")
+        self.checkbox_bin_averaging.setGeometry(QtCore.QRect(10, 400, 240, 20))
 
         self.button_ScanWellFile = QtWidgets.QPushButton(self.group_Wells)
         self.button_ScanWellFile.setGeometry(QtCore.QRect(400, 30, 51, 22))
         self.button_ScanWellFile.setObjectName("button_ScanWellFile")
 
         self.button_Extract = QtWidgets.QPushButton(self.centralwidget)
-        self.button_Extract.setGeometry(QtCore.QRect(20, 770, 75, 23))
+        self.button_Extract.setGeometry(QtCore.QRect(180, 790, 105, 23))
         self.button_Extract.setObjectName("button_Extract")
 
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setGeometry(QtCore.QRect(10, 800, 475, 32))
+        self.progressBar.setGeometry(QtCore.QRect(10, 825, 475, 32))
         self.progressBar.setProperty("value", 0)
         self.progressBar.setProperty("visible", False)        
         self.progressBar.setObjectName("progressBar")

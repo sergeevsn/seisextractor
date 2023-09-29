@@ -14,8 +14,7 @@ if __name__ == "__main__":
     extractor = Extractor(True)    
     print('Scanning seismic folder...')
     if not extractor.scan_seismic_folder(sys.argv[1]):
-        sys.exit()
-    new_depth = 0    
+        sys.exit()    
 
     # if columns specified
     columns_str = sys.argv[3]
@@ -24,13 +23,29 @@ if __name__ == "__main__":
         print('ERROR: you must specify 3 column names for X, Y and Depth, delimited by comma!')
         sys.exit()
 
-    if len(sys.argv) == 6:
-        try:
-            new_depth = int(sys.argv[5])
-        except:
-            print('Starting depth must be a number!')      
-            sys.exit()
-    extractor.recalc_depth(new_depth)
+    start_depth_from_cmdline = 0
+    bin_averaging_from_cmdline = False
+
+    extra_params = []
+    try:
+        extra_params.append(sys.argv[5])
+        extra_params.append(sys.argv[6])
+    except:
+        pass    
+
+    print(extra_params)
+
+    for param in extra_params:
+        if param.isdigit():
+            start_depth_from_cmdline = int(param)
+            extractor.recalc_depth(start_depth_from_cmdline)
+            print(f'recalculating depth with value {start_depth_from_cmdline}')
+        elif param in ['true', 'false']:
+            bin_averaging_from_cmdline = bool(param)
+            print(f'Setting  Bin Averaging to {bin_averaging_from_cmdline}')
+        else:
+            print('ERROR: Unknown command line argument: {param}')       
+        
     print('Loading well coordinates table...')
     if not extractor.load_table(sys.argv[2]):
         sys.exit()
@@ -39,7 +54,7 @@ if __name__ == "__main__":
         sys.exit()
 
     print('Calculating well grid coordinates...')
-    if not extractor.calc_well_grid_coords():
+    if not extractor.calc_well_grid_coords(bin_averaging_from_cmdline):
         sys.exit()       
 
     print('Extracting seismic data...')
@@ -50,4 +65,4 @@ if __name__ == "__main__":
     if not extractor.save_result_table(sys.argv[4]):
         sys.exit()
 
-    print(f'Extraction data from folder {sys.argv[1]} using coordinates from table {sys.argv[2]} is complete. Resulting table {sys.argv[3]} is saved.')            
+    print(f'Extraction data from folder {sys.argv[1]} using coordinates from table {sys.argv[2]} is complete. Resulting table {sys.argv[4]} is saved.')            
