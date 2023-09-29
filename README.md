@@ -3,6 +3,7 @@
 usage: ```python seisextractor <seg-y_folder> <well_coords_table> <coord_columns> <result_table> <bin_averaging> <start_depth>```
 
 ```bin_averaging``` and ```start_depth``` are optional parameters and are provided as true/false and a number.
+They can go in any order.
 By default bin_averaging is false and start_depth is equal to the value from SEG-Y trace headers.
 
 The program reads the first SEG-Y file of the given folder and scans headers for inlines, crosslines, 
@@ -33,7 +34,7 @@ Download repository and run on test data:
 
 ```cd cmd```
 
-```python seisextractor.py ../test_data ../test_data/well_coords.csv x,y,TVD results.csv 2170```
+```python seisextractor.py ../test_data ../test_data/well_coords.csv x,y,TVD results.csv 2170 true```
 
 
 ## GUI version

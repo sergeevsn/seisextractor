@@ -203,7 +203,7 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
 def main():
     app = QtWidgets.QApplication(sys.argv)   
     window = ExtractorApp() 
-    window.setWindowTitle("SeisExtractor GUI v.0.2")
+    window.setWindowTitle("SeisExtractor GUI v.0.3")
     window.show() 
     app.exec_()  
 

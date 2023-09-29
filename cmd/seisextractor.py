@@ -2,7 +2,7 @@ import sys
 sys.path.append("..")
 from common.classeslib import *
 
-GREETING_MSG = 'SeisExtractor v. 0.2: cmd tool for extracting seismic data from multiple SEG-Y files along wells with given X, Y, Z coordinates'
+GREETING_MSG = 'SeisExtractor v. 0.3: cmd tool for extracting seismic data from multiple SEG-Y files along wells with given X, Y, Z coordinates'
 
 if __name__ == "__main__":    
 
