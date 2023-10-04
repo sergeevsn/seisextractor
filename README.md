@@ -35,7 +35,7 @@ to set arbitrary bytes in future.
 Then it calculates mapping function from coordinates to inlines and crosslines.
 
 After well coordinates are read, the program iterates SEG-Y files and using RegularGridInterpolator, 
-extracts values from the cubes to new pandas table. Finally the resulting file is saved as CSV table.
+extracts values from the cubes to new pandas table. Finally the resulting file is saved as CSV/Excel table.
 
 Download repository and run on test data:
 ```git clone https://github.com/sergeevsn/seisextractor.git```
