@@ -42,6 +42,9 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.button_ScanWellFile.clicked.connect(self.scanWellFile)
 
         self.button_Extract.clicked.connect(self.extractData)
+        self.checkbox_bin_averaging.toggled.connect(self.enableExpansion)
+        
+        #self.spinbox_expansion.valueChanged.connect(self.ceilExpansionValue)
 
        
         
@@ -96,7 +99,11 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.list_Filenames.addItems(self.extractor.filenames)    
         self.wait_end()   
         target_item = self.table_SEGYParams.item(5, 1)
-        self.table_SEGYParams.editItem(target_item) 
+        self.spinbox_expansion.setValue(0)
+        self.spinbox_expansion.setSingleStep(int(self.extractor.bin_size))
+        extent = np.min([np.max(self.extractor.inlines), np.max(self.extractor.xlines)])//2
+        self.spinbox_expansion.setRange(0, extent*self.extractor.bin_size)
+        self.table_SEGYParams.editItem(target_item)         
         print('Done.')    
 
 
@@ -128,13 +135,15 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             self.errorMessage("Something wrong with your well coordinates table!")   
             return
         
-        self.fill_wellTable()              
+        self.fill_wellTable()           
+        self.combo_choose_wellcol.addItems(self.extractor.table.columns)   
         self.combo_choose_Xcol.addItems(self.extractor.table.columns)
         self.combo_choose_Ycol.addItems(self.extractor.table.columns)
         self.combo_choose_Zcol.addItems(self.extractor.table.columns)
-        self.combo_choose_Xcol.setCurrentIndex(0)
-        self.combo_choose_Ycol.setCurrentIndex(1)
-        self.combo_choose_Zcol.setCurrentIndex(2)
+        self.combo_choose_wellcol.setCurrentIndex(0)
+        self.combo_choose_Xcol.setCurrentIndex(1)
+        self.combo_choose_Ycol.setCurrentIndex(2)
+        self.combo_choose_Zcol.setCurrentIndex(3)
         self.wait_end()
          
     def updateDepth(self):
@@ -159,12 +168,19 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             return      
 
         self.extractor.recalc_depth(depth_start)    
+       
 
-        if not self.extractor.set_coord_columns_by_name(self.combo_choose_Xcol.currentText(), self.combo_choose_Ycol.currentText(), self.combo_choose_Zcol.currentText()):
+        if not self.extractor.set_columns_by_name(self.combo_choose_wellcol.currentText(), 
+        self.combo_choose_Xcol.currentText(), self.combo_choose_Ycol.currentText(), self.combo_choose_Zcol.currentText()):
             self.errorMessage("Something wrong with specified columns!")
             return
-       
-        if not self.extractor.calc_well_grid_coords(self.checkbox_bin_averaging.isChecked()):
+        
+        expansion = int(np.round(self.spinbox_expansion.value()/self.extractor.bin_size))               
+        if expansion >= np.max(self.extractor.inlines) or expansion >= np.max(self.extractor.xlines):
+            self.errorMessage("Too large expansion!")
+            return 
+        
+        if not self.extractor.calc_well_grid_coords(self.checkbox_bin_averaging.isChecked(), expansion):
             self.errorMessage("Cannot perform regression to calculate well grid coordinates!")
             return 
 
@@ -173,6 +189,7 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         if filename:
             for i, fname in enumerate(self.extractor.filenames):
                 
+                self.button_Extract.setProperty("visible", False)
                 self.progressBar.setProperty("visible", True)
                 self.wait_start()                    
                 
@@ -192,18 +209,25 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 return                     
 
             self.progressBar.setProperty("visible", False)
+            self.button_Extract.setProperty("visible", True)
             self.wait_end()
             self.successMessage(f'File {filename} successfully saved') 
             self.extractor.restore_table()
-              
-            
+
+    def enableExpansion(self):
+        if self.spinbox_expansion.isEnabled():
+            self.spinbox_expansion.setEnabled(False)
+            self.label_expansion.setEnabled(False)
+        else:
+            self.spinbox_expansion.setEnabled(True)    
+            self.label_expansion.setEnabled(True)            
 
                                            
 
 def main():
     app = QtWidgets.QApplication(sys.argv)   
     window = ExtractorApp() 
-    window.setWindowTitle("SeisExtractor GUI v.0.3")
+    window.setWindowTitle("SeisExtractor GUI v.0.4")
     window.show() 
     app.exec_()  
 

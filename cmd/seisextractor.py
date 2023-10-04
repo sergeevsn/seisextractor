@@ -2,59 +2,91 @@ import sys
 sys.path.append("..")
 from common.classeslib import *
 
-GREETING_MSG = 'SeisExtractor v. 0.3: cmd tool for extracting seismic data from multiple SEG-Y files along wells with given X, Y, Z coordinates'
+GREETING_MSG = 'SeisExtractor v. 0.4: cmd tool for extracting seismic data from multiple SEG-Y files along wells with given X, Y, Z coordinates'
+
+PARAM_KEYS = {'SEIS_FOLDER', 'WELL_TABLE', 'COLUMNS', 'RESULT_TABLE', 'START_DEPTH', 'BIN_AVERAGING', 'EXPANSION'}
+
+def read_params(fname):
+    try:
+        with open(fname) as f:
+            lines = f.readlines()
+    except:
+        print(f'ERROR: Cannot open file {fname}!')
+        sys.exit()
+                
+    param_keys_raw = [line.strip().split('=')[0] for line in lines]
+    param_values_raw = [line.strip().split('=')[1] for line in lines]
+    param_keys = [p.strip() for p in param_keys_raw]
+    param_values = [p.strip() for p in param_values_raw]
+   
+
+    if set(param_keys) != set(PARAM_KEYS):
+        print(f'ERROR: Wrong parameters in file {fname}!')
+        
+        sys.exit()
+
+    return  {k: v for k, v in zip(param_keys, param_values)}
+
 
 if __name__ == "__main__":    
 
     print(GREETING_MSG)
-    if len(sys.argv) < 5:
-        print('ERROR: You must provide a SEG-Y folder path, well coordinates table, columns for coordinates and results file name!')
+    if len(sys.argv) < 2:
+        print('ERROR: You must provide a parameters file!')
         sys.exit()
+
+    params = read_params(sys.argv[1])       
 
     extractor = Extractor(True)    
     print('Scanning seismic folder...')
-    if not extractor.scan_seismic_folder(sys.argv[1]):
+    if not extractor.scan_seismic_folder(params['SEIS_FOLDER']):
         sys.exit()    
 
     # if columns specified
-    columns_str = sys.argv[3]
+    columns_str = params['COLUMNS']
     column_names = columns_str.split(',')
-    if len(column_names) != 3:
-        print('ERROR: you must specify 3 column names for X, Y and Depth, delimited by comma!')
+    if len(column_names) != 4:
+        print('ERROR: you must specify 4 column names for Well, X, Y and Depth, delimited by comma!')
         sys.exit()
 
-    start_depth_from_cmdline = 0
-    bin_averaging_from_cmdline = False
-
-    extra_params = []
     try:
-        extra_params.append(sys.argv[5])
-        extra_params.append(sys.argv[6])
+        start_depth = int(params['START_DEPTH'])
     except:
-        pass    
+        print('ERROR: Wrong START_DEPTH parameter!')
+        sys.exit()
+    extractor.recalc_depth(start_depth)   
 
-    print(extra_params)
+    print(f'Starting depth is {start_depth}')
 
-    for param in extra_params:
-        if param.isdigit():
-            start_depth_from_cmdline = int(param)
-            extractor.recalc_depth(start_depth_from_cmdline)
-            print(f'recalculating depth with value {start_depth_from_cmdline}')
-        elif param in ['true', 'false']:
-            bin_averaging_from_cmdline = bool(param)
-            print(f'Setting  Bin Averaging to {bin_averaging_from_cmdline}')
-        else:
-            print('ERROR: Unknown command line argument: {param}')       
+    if not params['BIN_AVERAGING'] in ['true', 'false', 'True', 'False']:
+        print('ERROR: Wrong BIN_AVERAGING parameter!')
+        sys.exit()
+
+    if params['BIN_AVERAGING'] in ['true', 'True']:
+        bin_averaging = True
+    else:
+        bin_averaging = False    
+    print(f'Setting  Bin Averaging to {bin_averaging}')
+
+    try:
+        expansion = int(params['EXPANSION'])
+    except:
+        print('ERROR: Wrong EXPANSION parameter!')
+        sys.exit()    
+            
         
     print('Loading well coordinates table...')
-    if not extractor.load_table(sys.argv[2]):
+    if not extractor.load_table(params['WELL_TABLE']):
         sys.exit()
 
-    if not extractor.set_coord_columns_by_name(*column_names):
+    if not extractor.set_columns_by_name(*column_names):
         sys.exit()
 
     print('Calculating well grid coordinates...')
-    if not extractor.calc_well_grid_coords(bin_averaging_from_cmdline):
+
+    # meters to samples
+    expansion = int(np.round(expansion/extractor.bin_size)) 
+    if not extractor.calc_well_grid_coords(bin_averaging, expansion):
         sys.exit()       
 
     print('Extracting seismic data...')
@@ -62,7 +94,6 @@ if __name__ == "__main__":
         if not extractor.extract_attribute(fname):
             sys.exit()
 
-    if not extractor.save_result_table(sys.argv[4]):
-        sys.exit()
+    if not extractor.save_result_table(params['RESULT_TABLE']):
+        sys.exit()      
 
-    print(f'Extraction data from folder {sys.argv[1]} using coordinates from table {sys.argv[2]} is complete. Resulting table {sys.argv[4]} is saved.')            

@@ -1,0 +1,7 @@
+SEIS_FOLDER = ../test_data
+WELL_TABLE = ../test_data/well_coords.csv
+COLUMNS = Wells,x,y,TVD
+RESULT_TABLE = ../test_data/result_exp5.xlsx
+START_DEPTH = 2170
+BIN_AVERAGING = true
+EXPANSION = 125

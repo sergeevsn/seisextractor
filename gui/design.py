@@ -74,7 +74,7 @@ class Ui_MainWindow(object):
         self.button_ScanSegyFolder.setObjectName("button_ScanSegyFolder")
 
         self.group_Wells = QtWidgets.QGroupBox(self.centralwidget)
-        self.group_Wells.setGeometry(QtCore.QRect(10, 350, 500, 430))
+        self.group_Wells.setGeometry(QtCore.QRect(10, 350, 500, 460))
         self.group_Wells.setObjectName("group_Wells")   
 
         self.label_3 = QtWidgets.QLabel(self.group_Wells)
@@ -98,41 +98,60 @@ class Ui_MainWindow(object):
         self.table_WellData.setColumnWidth(0, 80)     
         self.table_WellData.setRowCount(0)
 
+        self.label_choose_wellcol = QtWidgets.QLabel(self.group_Wells)
+        self.label_choose_wellcol.setGeometry(QtCore.QRect(10, 310, 160, 20))
+        self.label_choose_wellcol.setText('Choose column for Well:')
+        self.combo_choose_wellcol = QtWidgets.QComboBox(self.group_Wells)
+        self.combo_choose_wellcol.setGeometry(QtCore.QRect(200, 310, 240, 20))
+
         self.label_choose_Xcol = QtWidgets.QLabel(self.group_Wells)
-        self.label_choose_Xcol.setGeometry(QtCore.QRect(10, 310, 160, 20))
+        self.label_choose_Xcol.setGeometry(QtCore.QRect(10, 340, 160, 20))
         self.label_choose_Xcol.setText('Choose column for X coord:')
         self.combo_choose_Xcol = QtWidgets.QComboBox(self.group_Wells)
-        self.combo_choose_Xcol.setGeometry(QtCore.QRect(200, 310, 240, 20))
+        self.combo_choose_Xcol.setGeometry(QtCore.QRect(200, 340, 240, 20))
 
         self.label_choose_Ycol = QtWidgets.QLabel(self.group_Wells)
-        self.label_choose_Ycol.setGeometry(QtCore.QRect(10, 340, 160, 20))
+        self.label_choose_Ycol.setGeometry(QtCore.QRect(10, 370, 160, 20))
         self.label_choose_Ycol.setText('Choose column for Y coord:')
         self.combo_choose_Ycol = QtWidgets.QComboBox(self.group_Wells)
-        self.combo_choose_Ycol.setGeometry(QtCore.QRect(200, 340, 240, 20))        
+        self.combo_choose_Ycol.setGeometry(QtCore.QRect(200, 370, 240, 20))        
 
         self.label_choose_Zcol = QtWidgets.QLabel(self.group_Wells)
-        self.label_choose_Zcol.setGeometry(QtCore.QRect(10, 370, 160, 20))
+        self.label_choose_Zcol.setGeometry(QtCore.QRect(10, 400, 160, 20))
         self.label_choose_Zcol.setText('Choose column for Depth:')
         self.combo_choose_Zcol = QtWidgets.QComboBox(self.group_Wells)
-        self.combo_choose_Zcol.setGeometry(QtCore.QRect(200, 370, 240, 20))
+        self.combo_choose_Zcol.setGeometry(QtCore.QRect(200, 400, 240, 20))
+
+        
         
         self.checkbox_bin_averaging = QtWidgets.QCheckBox(self.group_Wells)
         self.checkbox_bin_averaging.setText("Bin averaging")
-        self.checkbox_bin_averaging.setGeometry(QtCore.QRect(10, 400, 240, 20))
+        self.checkbox_bin_averaging.setGeometry(QtCore.QRect(10, 430, 100, 20))
+
+        
+        self.label_expansion = QtWidgets.QLabel(self.group_Wells)
+        self.label_expansion.setText("Inline-Crossline Expansion, m:")
+        self.label_expansion.setGeometry(QtCore.QRect(200, 430, 200, 20))
+        self.label_expansion.setEnabled(False)
+        self.spinbox_expansion = QtWidgets.QSpinBox(self.group_Wells)        
+        self.spinbox_expansion.setGeometry(QtCore.QRect(350, 430, 90, 20))
+        self.spinbox_expansion.setEnabled(False)
+              
 
         self.button_ScanWellFile = QtWidgets.QPushButton(self.group_Wells)
         self.button_ScanWellFile.setGeometry(QtCore.QRect(400, 30, 51, 22))
         self.button_ScanWellFile.setObjectName("button_ScanWellFile")
 
         self.button_Extract = QtWidgets.QPushButton(self.centralwidget)
-        self.button_Extract.setGeometry(QtCore.QRect(180, 790, 105, 23))
+        self.button_Extract.setGeometry(QtCore.QRect(180, 820, 105, 23))
         self.button_Extract.setObjectName("button_Extract")
 
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setGeometry(QtCore.QRect(10, 825, 475, 32))
+        self.progressBar.setGeometry(QtCore.QRect(10, 820, 475, 32))
         self.progressBar.setProperty("value", 0)
         self.progressBar.setProperty("visible", False)        
         self.progressBar.setObjectName("progressBar")
+
 
         MainWindow.setCentralWidget(self.centralwidget)
 
