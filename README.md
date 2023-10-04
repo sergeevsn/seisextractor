@@ -61,8 +61,11 @@ To run with test data, just type in terminal:
 ```python main.py```
 
 Choose the ```test_data``` folder in ```SEISMIC``` section, then click ```Scan```.
-Choose file ```test_data/well_coords.csv``` in ```WELLS``` section, then clicl ```Scan```
-Then choose columns: "x" for X Coordinate, "y" for Y coordinate and "TVD" for Depth.
+Choose file ```test_data/well_coords.csv``` in ```WELLS``` section, then click ```Scan```.
+Then choose columns: "Wells" for Well column, 
+"x" for X Coordinate, "y" for Y coordinate and "TVD" for Depth.
+
+Choose ```bin_averaging``` state and ```expansion``` value if needed.
 
 Finally, click ```Extract``` and choose the file to save results in, either CSV or Excel.
 
