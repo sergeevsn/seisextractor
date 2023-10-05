@@ -135,7 +135,11 @@ class ExtractorApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             self.errorMessage("Something wrong with your well coordinates table!")   
             return
         
-        self.fill_wellTable()           
+        self.fill_wellTable()         
+        self.combo_choose_wellcol.clear()  
+        self.combo_choose_Xcol.clear()
+        self.combo_choose_Ycol.clear()
+        self.combo_choose_Zcol.clear()
         self.combo_choose_wellcol.addItems(self.extractor.table.columns)   
         self.combo_choose_Xcol.addItems(self.extractor.table.columns)
         self.combo_choose_Ycol.addItems(self.extractor.table.columns)

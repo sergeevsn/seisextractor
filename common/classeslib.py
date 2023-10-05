@@ -58,6 +58,8 @@ class Extractor:
             return False
 
         with segyio.open(os.path.join(self.seis_folder, self.filenames[0]), ignore_geometry=True) as f:
+            self.geo_coords = []
+            self.grid_coords = []
             for i in range(f.tracecount):
                 self.geo_coords.append([f.header[i][cdpx_byte], f.header[i][cdpy_byte]])
                 if self.is3D:

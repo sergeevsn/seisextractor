@@ -135,7 +135,7 @@ class Ui_MainWindow(object):
         self.label_expansion.setEnabled(False)
         self.spinbox_expansion = QtWidgets.QSpinBox(self.group_Wells)        
         self.spinbox_expansion.setGeometry(QtCore.QRect(350, 430, 90, 20))
-        self.spinbox_expansion.setEnabled(False)
+        self.spinbox_expansion.setEnabled(False)  
               
 
         self.button_ScanWellFile = QtWidgets.QPushButton(self.group_Wells)
